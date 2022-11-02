@@ -1,0 +1,5 @@
+⚠️  ┌ Deno requests write access to "
+".
+   ├ Requested by `Deno.permissions.query()` API
+   ├ Run again with --allow-write to bypass this prompt.
+   └ Allow? [y/n] (y = yes, allow; n = no, deny) >

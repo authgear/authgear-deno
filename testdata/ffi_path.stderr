@@ -1,0 +1,4 @@
+⚠️  ┌ Deno requests ffi access to "/".
+   ├ Requested by `Deno.permissions.query()` API
+   ├ Run again with --allow-ffi to bypass this prompt.
+   └ Allow? [y/n] (y = yes, allow; n = no, deny) >
