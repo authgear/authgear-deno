@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - '*'
+    - '!gh-pages'
+    tags:
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+    - '!gh-pages'
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: "1.19.2"
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: "1.27.0"
+    - run: make vet
+      if: ${{ !cancelled() }}
+    - run: make test
+      if: ${{ !cancelled() }}
+    - run: make check-tidy
+      if: ${{ !cancelled() }}
