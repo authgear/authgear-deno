@@ -6,28 +6,63 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/creack/pty"
 )
 
+type RunOptions struct {
+	// TargetScript is the filename of the target script.
+	TargetScript string
+	// Input is the filename of the input.
+	Input string
+	// Output is the filename of the output.
+	Output string
+}
+
 type Runner struct {
+	// RunnerScript is the runner script that will import the target script
+	// and execute the default function.
+	RunnerScript string
+	// Permissioner manages the permissions of the target script.
 	Permissioner Permissioner
 }
 
-func NewRunner(permissioner Permissioner) *Runner {
-	return &Runner{
-		Permissioner: permissioner,
+func (r *Runner) runnerScript() string {
+	if r.RunnerScript != "" {
+		return r.RunnerScript
 	}
+	return "./runner.ts"
 }
 
-func (r *Runner) RunFile(ctx context.Context, filename string) error {
+func (r *Runner) RunFile(ctx context.Context, opts RunOptions) error {
+	runnerScript := r.runnerScript()
+
+	targetScript, err := filepath.Abs(opts.TargetScript)
+	if err != nil {
+		return err
+	}
+	input, err := filepath.Abs(opts.Input)
+	if err != nil {
+		return err
+	}
+	output, err := filepath.Abs(opts.Output)
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.CommandContext(
 		ctx,
 		"deno",
 		"run",
 		"--quiet",
-		filename,
+		fmt.Sprintf("--allow-read=%v,%v", targetScript, input),
+		fmt.Sprintf("--allow-write=%v", output),
+		runnerScript,
+		targetScript,
+		input,
+		output,
 	)
 
 	// Tell deno not to output ASCII escape code.

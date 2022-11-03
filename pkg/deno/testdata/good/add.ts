@@ -1,3 +1,3 @@
-export default function add(a, b) {
-  return a + b;
+export default function addOne(a) {
+  return a + 1;
 }
