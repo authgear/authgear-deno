@@ -2,6 +2,7 @@ package deno
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,33 @@ import (
 	"github.com/creack/pty"
 )
 
+type RunFileResult struct {
+	Stdout *bytes.Buffer
+	Stderr *bytes.Buffer
+}
+
+func (r *RunFileResult) Wrap(err error) error {
+	return &RunFileError{
+		Inner:  err,
+		Stdout: r.Stdout,
+		Stderr: r.Stderr,
+	}
+}
+
+type RunFileError struct {
+	Inner  error
+	Stdout *bytes.Buffer
+	Stderr *bytes.Buffer
+}
+
+func (e *RunFileError) Error() string {
+	return e.Inner.Error()
+}
+
+func (e *RunFileError) Unwrap() error {
+	return e.Inner
+}
+
 type RunFileOptions struct {
 	// TargetScript is the filename of the target script.
 	TargetScript string
@@ -21,6 +49,12 @@ type RunFileOptions struct {
 	Input string
 	// Output is the filename of the output.
 	Output string
+}
+
+type RunGoValueResult struct {
+	Output interface{}
+	Stdout *bytes.Buffer
+	Stderr *bytes.Buffer
 }
 
 type RunGoValueOptions struct {
@@ -45,20 +79,20 @@ func (r *Runner) runnerScript() string {
 	return "./runner.ts"
 }
 
-func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) error {
+func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResult, error) {
 	runnerScript := r.runnerScript()
 
 	targetScript, err := filepath.Abs(opts.TargetScript)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	input, err := filepath.Abs(opts.Input)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	output, err := filepath.Abs(opts.Output)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	cmd := exec.CommandContext(
@@ -77,19 +111,22 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) error {
 	// Tell deno not to output ASCII escape code.
 	cmd.Env = append(cmd.Environ(), "NO_COLOR=1")
 
-	// Pipe stdout to io.Discard so that we get a cleaner stderr.
-	cmd.Stdout = io.Discard
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	// Separate stdout and stderr.
+	cmd.Stdout = &stdout
 
 	// Allocate a pty, connect stdin and stderr to the pty, and start the command.
 	f, err := pty.Start(cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer f.Close()
 
 	// Read stderr
 	go func() {
-		scanner := bufio.NewScanner(f)
+		scanner := bufio.NewScanner(io.TeeReader(f, &stderr))
 		scanner.Split(ScanStderr)
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -112,13 +149,20 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) error {
 
 	err = cmd.Wait()
 	if err != nil {
-		return err
+		return nil, &RunFileError{
+			Inner:  err,
+			Stdout: &stdout,
+			Stderr: &stderr,
+		}
 	}
 
-	return nil
+	return &RunFileResult{
+		Stdout: &stdout,
+		Stderr: &stderr,
+	}, nil
 }
 
-func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (out interface{}, err error) {
+func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (*RunGoValueResult, error) {
 	targetScript, err := os.CreateTemp("", "authgear-deno-script.*.ts")
 	if err != nil {
 		return nil, err
@@ -155,7 +199,7 @@ func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (out in
 		return nil, err
 	}
 
-	err = r.RunFile(ctx, RunFileOptions{
+	runFileResult, err := r.RunFile(ctx, RunFileOptions{
 		TargetScript: targetScript.Name(),
 		Input:        input.Name(),
 		Output:       output.Name(),
@@ -164,16 +208,21 @@ func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (out in
 		return nil, err
 	}
 
+	var out interface{}
 	err = json.NewDecoder(output).Decode(&out)
 	if err != nil {
-		return nil, err
+		return nil, runFileResult.Wrap(err)
 	}
 	err = output.Close()
 	if err != nil {
-		return nil, err
+		return nil, runFileResult.Wrap(err)
 	}
 
-	return
+	return &RunGoValueResult{
+		Output: out,
+		Stdout: runFileResult.Stdout,
+		Stderr: runFileResult.Stderr,
+	}, nil
 }
 
 func (r *Runner) askPermission(ctx context.Context, d PermissionDescriptor) bool {

@@ -3,6 +3,7 @@ package deno
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -74,7 +75,7 @@ func TestRunner(t *testing.T) {
 						Input:        changeExtension(p, ".in"),
 						Output:       changeExtension(p, ".out"),
 					}
-					err := runner.RunFile(ctx, opts)
+					_, err := runner.RunFile(ctx, opts)
 					So(err, ShouldBeNil)
 
 					expected := opts.Output + ".expected"
@@ -91,10 +92,11 @@ func TestRunner(t *testing.T) {
 						Input:        changeExtension(p, ".in"),
 						Output:       changeExtension(p, ".out"),
 					}
-					err := runner.RunFile(ctx, opts)
+					_, err := runner.RunFile(ctx, opts)
+					var runError *RunFileError
 					var exitError *exec.ExitError
-					So(err, ShouldHaveSameTypeAs, exitError)
-					exitError = err.(*exec.ExitError)
+					So(errors.As(err, &runError), ShouldBeTrue)
+					So(errors.As(err, &exitError), ShouldBeTrue)
 					So(exitError.ExitCode(), ShouldEqual, 1)
 				})
 			}
@@ -121,13 +123,13 @@ func TestRunner(t *testing.T) {
 						Input:        input,
 					}
 
-					actual, err := runner.RunGoValue(ctx, opts)
+					runGoValueResult, err := runner.RunGoValue(ctx, opts)
 					So(err, ShouldBeNil)
 
 					expectedBytes, err := ioutil.ReadFile(changeExtension(p, ".out.expected"))
 					So(err, ShouldBeNil)
 
-					actualBytes, err := json.Marshal(actual)
+					actualBytes, err := json.Marshal(runGoValueResult.Output)
 					So(err, ShouldBeNil)
 
 					So(string(actualBytes), ShouldEqualJSON, string(expectedBytes))
