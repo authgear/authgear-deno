@@ -2,7 +2,9 @@ package deno
 
 import (
 	"context"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -62,38 +64,75 @@ func TestRunner(t *testing.T) {
 			),
 		}
 
-		targetScripts, err := filepath.Glob("./testdata/good/*.ts")
-		So(err, ShouldBeNil)
-		for _, p := range targetScripts {
-			Convey(p, func() {
-				opts := RunOptions{
-					TargetScript: p,
-					Input:        changeExtension(p, ".in"),
-					Output:       changeExtension(p, ".out"),
-				}
-				err := runner.RunFile(ctx, opts)
-				So(err, ShouldBeNil)
+		Convey("RunFile", func() {
+			targetScripts, err := filepath.Glob("./testdata/good/*.ts")
+			So(err, ShouldBeNil)
+			for _, p := range targetScripts {
+				Convey(p, func() {
+					opts := RunFileOptions{
+						TargetScript: p,
+						Input:        changeExtension(p, ".in"),
+						Output:       changeExtension(p, ".out"),
+					}
+					err := runner.RunFile(ctx, opts)
+					So(err, ShouldBeNil)
 
-				expected := opts.Output + ".expected"
-				So(opts.Output, shouldEqualContent, expected)
-			})
-		}
+					expected := opts.Output + ".expected"
+					So(opts.Output, shouldEqualContent, expected)
+				})
+			}
 
-		targetScripts, err = filepath.Glob("./testdata/bad/*.ts")
-		So(err, ShouldBeNil)
-		for _, p := range targetScripts {
-			Convey(p, func() {
-				opts := RunOptions{
-					TargetScript: p,
-					Input:        changeExtension(p, ".in"),
-					Output:       changeExtension(p, ".out"),
-				}
-				err := runner.RunFile(ctx, opts)
-				var exitError *exec.ExitError
-				So(err, ShouldHaveSameTypeAs, exitError)
-				exitError = err.(*exec.ExitError)
-				So(exitError.ExitCode(), ShouldEqual, 1)
-			})
-		}
+			targetScripts, err = filepath.Glob("./testdata/bad/*.ts")
+			So(err, ShouldBeNil)
+			for _, p := range targetScripts {
+				Convey(p, func() {
+					opts := RunFileOptions{
+						TargetScript: p,
+						Input:        changeExtension(p, ".in"),
+						Output:       changeExtension(p, ".out"),
+					}
+					err := runner.RunFile(ctx, opts)
+					var exitError *exec.ExitError
+					So(err, ShouldHaveSameTypeAs, exitError)
+					exitError = err.(*exec.ExitError)
+					So(exitError.ExitCode(), ShouldEqual, 1)
+				})
+			}
+		})
+
+		Convey("RunGoValue", func() {
+			targetScripts, err := filepath.Glob("./testdata/good/*.ts")
+			So(err, ShouldBeNil)
+			for _, p := range targetScripts {
+				Convey(p, func() {
+					targetScriptBytes, err := ioutil.ReadFile(p)
+					So(err, ShouldBeNil)
+					targetScript := string(targetScriptBytes)
+
+					inputBytes, err := ioutil.ReadFile(changeExtension(p, ".in"))
+					So(err, ShouldBeNil)
+
+					var input interface{}
+					err = json.Unmarshal(inputBytes, &input)
+					So(err, ShouldBeNil)
+
+					opts := RunGoValueOptions{
+						TargetScript: targetScript,
+						Input:        input,
+					}
+
+					actual, err := runner.RunGoValue(ctx, opts)
+					So(err, ShouldBeNil)
+
+					expectedBytes, err := ioutil.ReadFile(changeExtension(p, ".out.expected"))
+					So(err, ShouldBeNil)
+
+					actualBytes, err := json.Marshal(actual)
+					So(err, ShouldBeNil)
+
+					So(string(actualBytes), ShouldEqualJSON, string(expectedBytes))
+				})
+			}
+		})
 	})
 }

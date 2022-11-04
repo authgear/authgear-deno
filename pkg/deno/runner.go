@@ -3,8 +3,10 @@ package deno
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -12,13 +14,20 @@ import (
 	"github.com/creack/pty"
 )
 
-type RunOptions struct {
+type RunFileOptions struct {
 	// TargetScript is the filename of the target script.
 	TargetScript string
 	// Input is the filename of the input.
 	Input string
 	// Output is the filename of the output.
 	Output string
+}
+
+type RunGoValueOptions struct {
+	// TargetScript is the content of the target script.
+	TargetScript string
+	// Input is the input.
+	Input interface{}
 }
 
 type Runner struct {
@@ -36,7 +45,7 @@ func (r *Runner) runnerScript() string {
 	return "./runner.ts"
 }
 
-func (r *Runner) RunFile(ctx context.Context, opts RunOptions) error {
+func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) error {
 	runnerScript := r.runnerScript()
 
 	targetScript, err := filepath.Abs(opts.TargetScript)
@@ -107,6 +116,64 @@ func (r *Runner) RunFile(ctx context.Context, opts RunOptions) error {
 	}
 
 	return nil
+}
+
+func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (out interface{}, err error) {
+	targetScript, err := os.CreateTemp("", "authgear-deno-script.*.ts")
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(targetScript.Name())
+
+	input, err := os.CreateTemp("", "authgear-deno-input.*.json")
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(input.Name())
+
+	output, err := os.CreateTemp("", "authgear-deno-output.*.json")
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(output.Name())
+
+	_, err = io.Copy(targetScript, strings.NewReader(opts.TargetScript))
+	if err != nil {
+		return nil, err
+	}
+	err = targetScript.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.NewEncoder(input).Encode(opts.Input)
+	if err != nil {
+		return nil, err
+	}
+	err = input.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.RunFile(ctx, RunFileOptions{
+		TargetScript: targetScript.Name(),
+		Input:        input.Name(),
+		Output:       output.Name(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.NewDecoder(output).Decode(&out)
+	if err != nil {
+		return nil, err
+	}
+	err = output.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return
 }
 
 func (r *Runner) askPermission(ctx context.Context, d PermissionDescriptor) bool {
