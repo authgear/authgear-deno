@@ -100,6 +100,9 @@ func TestRunner(t *testing.T) {
 					_, err := runner.RunFile(ctx, opts)
 					var runError *RunFileError
 					var exitError *exec.ExitError
+					// TODO: I wanted to match the stderr as well. But 2 problems block me.
+					// 1. The stderr contains some ASCII escape sequence that Deno uses to clear the screen.
+					// 2. The stack trace of Deno prints the absolute path of the script, which makes it hard to perform matching on different machines.
 					So(errors.As(err, &runError), ShouldBeTrue)
 					So(errors.As(err, &exitError), ShouldBeTrue)
 					So(exitError.ExitCode(), ShouldEqual, 1)
