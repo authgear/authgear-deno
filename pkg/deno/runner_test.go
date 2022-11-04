@@ -75,11 +75,16 @@ func TestRunner(t *testing.T) {
 						Input:        changeExtension(p, ".in"),
 						Output:       changeExtension(p, ".out"),
 					}
-					_, err := runner.RunFile(ctx, opts)
+					result, err := runner.RunFile(ctx, opts)
 					So(err, ShouldBeNil)
 
 					expected := opts.Output + ".expected"
 					So(opts.Output, shouldEqualContent, expected)
+
+					actualStdout := result.Stdout.Bytes()
+					expectedStdout, err := ioutil.ReadFile(changeExtension(p, ".stdout"))
+					So(err, ShouldBeNil)
+					So(actualStdout, ShouldResemble, expectedStdout)
 				})
 			}
 
