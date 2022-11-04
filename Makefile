@@ -1,3 +1,7 @@
+.PHONY: start
+start:
+	go run ./cmd/server
+
 .PHONY: fmt
 fmt:
 	go fmt ./...
