@@ -1,3 +1,8 @@
+.PHONY: vendor
+vendor:
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.50.1
+	go mod download
+
 .PHONY: start
 start:
 	go run ./cmd/server
@@ -6,9 +11,9 @@ start:
 fmt:
 	go fmt ./...
 
-.PHONY: vet
-vet:
-	go vet ./...
+.PHONY: lint
+lint:
+	golangci-lint run ./cmd/... ./pkg/...
 
 .PHONY: test
 test:

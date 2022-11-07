@@ -1,0 +1,28 @@
+linters:
+  disable:
+  - wrapcheck
+  - gofumpt
+  - scopelint
+  - deadcode
+  - maligned
+  - structcheck
+  - varcheck
+  presets:
+  - bugs
+  - error
+  - format
+  - import
+  - metalinter
+  - performance
+  - sql
+  - unused
+linters-settings:
+  gci:
+    sections:
+    - standard
+    - default
+    - prefix(github.com/authgear/authgear-deno)
+    - dot
+  gocritic:
+    disabled-checks:
+    - sloppyLen
