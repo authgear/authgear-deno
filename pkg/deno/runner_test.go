@@ -84,7 +84,7 @@ func TestRunner(t *testing.T) {
 					actualStdout := result.Stdout.Bytes()
 					expectedStdout, err := ioutil.ReadFile(changeExtension(p, ".stdout"))
 					So(err, ShouldBeNil)
-					So(actualStdout, ShouldResemble, expectedStdout)
+					So(string(actualStdout), ShouldEqual, string(expectedStdout))
 				})
 			}
 
