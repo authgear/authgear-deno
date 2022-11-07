@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/authgear/authgear-deno/pkg/deno"
 	"github.com/authgear/authgear-deno/pkg/handler"
@@ -20,7 +21,13 @@ func main() {
 	}
 	h := handler.New(runner)
 	http.Handle("/", h)
-	err = http.ListenAndServe(cfg.ListenAddr, nil)
+
+	server := &http.Server{
+		Addr:              cfg.ListenAddr,
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+
+	err = server.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}

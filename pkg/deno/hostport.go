@@ -64,15 +64,15 @@ func (p *HostPort) String() string {
 	return host + ":" + p.Port
 }
 
-func (t HostPort) MarshalText() ([]byte, error) {
-	return []byte(t.String()), nil
+func (p HostPort) MarshalText() ([]byte, error) {
+	return []byte(p.String()), nil
 }
 
-func (t *HostPort) UnmarshalText(text []byte) error {
+func (p *HostPort) UnmarshalText(text []byte) error {
 	parsed, err := ParseHostPort(string(text))
 	if err != nil {
 		return err
 	}
-	*t = *parsed
+	*p = *parsed
 	return nil
 }

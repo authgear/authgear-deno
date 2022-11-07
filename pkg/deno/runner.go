@@ -95,7 +95,7 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(
+	cmd := exec.CommandContext( //nolint:gosec
 		ctx,
 		"deno",
 		"run",

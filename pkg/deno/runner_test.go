@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -82,7 +81,7 @@ func TestRunner(t *testing.T) {
 					So(opts.Output, shouldEqualContent, expected)
 
 					actualStdout := result.Stdout.Bytes()
-					expectedStdout, err := ioutil.ReadFile(changeExtension(p, ".stdout"))
+					expectedStdout, err := os.ReadFile(changeExtension(p, ".stdout"))
 					So(err, ShouldBeNil)
 					So(string(actualStdout), ShouldEqual, string(expectedStdout))
 				})
@@ -115,11 +114,11 @@ func TestRunner(t *testing.T) {
 			So(err, ShouldBeNil)
 			for _, p := range targetScripts {
 				Convey(p, func() {
-					targetScriptBytes, err := ioutil.ReadFile(p)
+					targetScriptBytes, err := os.ReadFile(p)
 					So(err, ShouldBeNil)
 					targetScript := string(targetScriptBytes)
 
-					inputBytes, err := ioutil.ReadFile(changeExtension(p, ".in"))
+					inputBytes, err := os.ReadFile(changeExtension(p, ".in"))
 					So(err, ShouldBeNil)
 
 					var input interface{}
@@ -134,7 +133,7 @@ func TestRunner(t *testing.T) {
 					runGoValueResult, err := runner.RunGoValue(ctx, opts)
 					So(err, ShouldBeNil)
 
-					expectedBytes, err := ioutil.ReadFile(changeExtension(p, ".out.expected"))
+					expectedBytes, err := os.ReadFile(changeExtension(p, ".out.expected"))
 					So(err, ShouldBeNil)
 
 					actualBytes, err := json.Marshal(runGoValueResult.Output)

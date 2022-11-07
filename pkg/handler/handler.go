@@ -40,7 +40,7 @@ func (t *T) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.writeResult(w, r, result)
 }
 
-func (t *T) handle(w http.ResponseWriter, r *http.Request) (*deno.RunGoValueResult, error) {
+func (t *T) handle(_ http.ResponseWriter, r *http.Request) (*deno.RunGoValueResult, error) {
 	var runRequest RunRequest
 	err := json.NewDecoder(r.Body).Decode(&runRequest)
 	if err != nil {
@@ -82,7 +82,8 @@ func (t *T) writeResult(w http.ResponseWriter, r *http.Request, result *deno.Run
 	t.writeJSON(w, r, runResponse)
 }
 
-func (t *T) writeJSON(w http.ResponseWriter, r *http.Request, jsonValue interface{}) {
+func (t *T) writeJSON(w http.ResponseWriter, _ *http.Request, jsonValue interface{}) {
 	w.Header().Set("Content-Type", "application/json")
+	//nolint:errchkjson
 	_ = json.NewEncoder(w).Encode(jsonValue)
 }

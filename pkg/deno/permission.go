@@ -22,8 +22,10 @@ const (
 	SysKindSystemMemoryInfo  SysKind = "systemMemoryInfo"
 	SysKindNetworkInterfaces SysKind = "networkInterfaces"
 	SysKindosRelease         SysKind = "osRelease"
-	SysKindosUid             SysKind = "uid"
-	SysKindosGid             SysKind = "gid"
+	//nolint:revive
+	SysKindosUid SysKind = "uid"
+	//nolint:revive
+	SysKindosGid SysKind = "gid"
 )
 
 func ParseSysKind(kind string) (SysKind, bool) {
