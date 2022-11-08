@@ -23,6 +23,8 @@ jobs:
     - uses: denoland/setup-deno@v1
       with:
         deno-version: "1.27.0"
+    - run: make vendor
+      if: ${{ !cancelled() }}
     - run: make lint
       if: ${{ !cancelled() }}
     - run: make test
