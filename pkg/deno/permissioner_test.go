@@ -28,9 +28,9 @@ func TestAllowRemoteIP(t *testing.T) {
 			{`{"name":"net","host":"127.0.0.1:8080"}`, false, ""},
 			{`{"name":"net","host":"[::1]"}`, false, ""},
 			{`{"name":"net","host":"[::1]:8080"}`, false, ""},
-			{`{"name":"net","host":"1.1.1.1"}`, false, "ip is global unicast"},
-			{`{"name":"net","host":"8.8.8.8"}`, false, "ip is global unicast"},
-			{`{"name":"net","host":"0.0.0.0"}`, false, "ip is unspecified"},
+			{`{"name":"net","host":"1.1.1.1"}`, false, "global unicast: 1.1.1.1"},
+			{`{"name":"net","host":"8.8.8.8"}`, false, "global unicast: 8.8.8.8"},
+			{`{"name":"net","host":"0.0.0.0"}`, false, "unspecified: 0.0.0.0"},
 		}
 		ctx := context.Background()
 
