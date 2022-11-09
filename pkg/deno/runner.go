@@ -13,11 +13,18 @@ import (
 	"strings"
 
 	"github.com/creack/pty"
+
+	"github.com/authgear/authgear-deno/pkg/ioutil"
 )
 
+type StdStream = *ioutil.LimitedWriter[*bytes.Buffer]
+
+// StdStreamLimit is 1MiB.
+const StdStreamLimit int64 = 1 * 1024 * 1024
+
 type RunFileResult struct {
-	Stdout *bytes.Buffer
-	Stderr *bytes.Buffer
+	Stdout StdStream
+	Stderr StdStream
 }
 
 func (r *RunFileResult) Wrap(err error) error {
@@ -30,8 +37,8 @@ func (r *RunFileResult) Wrap(err error) error {
 
 type RunFileError struct {
 	Inner  error
-	Stdout *bytes.Buffer
-	Stderr *bytes.Buffer
+	Stdout StdStream
+	Stderr StdStream
 }
 
 func (e *RunFileError) Error() string {
@@ -53,8 +60,8 @@ type RunFileOptions struct {
 
 type RunGoValueResult struct {
 	Output interface{}
-	Stdout *bytes.Buffer
-	Stderr *bytes.Buffer
+	Stdout StdStream
+	Stderr StdStream
 }
 
 type RunGoValueOptions struct {
@@ -111,11 +118,11 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 	// Tell deno not to output ASCII escape code.
 	cmd.Env = append(cmd.Environ(), "NO_COLOR=1")
 
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
+	stdout := ioutil.LimitWriter(&bytes.Buffer{}, StdStreamLimit)
+	stderr := ioutil.LimitWriter(&bytes.Buffer{}, StdStreamLimit)
 
 	// Separate stdout and stderr.
-	cmd.Stdout = &stdout
+	cmd.Stdout = stdout
 
 	// Allocate a pty, connect stdin and stderr to the pty, and start the command.
 	f, err := pty.Start(cmd)
@@ -126,7 +133,7 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 
 	// Read stderr
 	go func() {
-		scanner := bufio.NewScanner(io.TeeReader(f, &stderr))
+		scanner := bufio.NewScanner(io.TeeReader(f, stderr))
 		scanner.Split(ScanStderr)
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -151,14 +158,14 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 	if err != nil {
 		return nil, &RunFileError{
 			Inner:  err,
-			Stdout: &stdout,
-			Stderr: &stderr,
+			Stdout: stdout,
+			Stderr: stderr,
 		}
 	}
 
 	return &RunFileResult{
-		Stdout: &stdout,
-		Stderr: &stderr,
+		Stdout: stdout,
+		Stderr: stderr,
 	}, nil
 }
 

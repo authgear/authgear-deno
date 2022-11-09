@@ -80,7 +80,7 @@ func TestRunner(t *testing.T) {
 					expected := opts.Output + ".expected"
 					So(opts.Output, shouldEqualContent, expected)
 
-					actualStdout := result.Stdout.Bytes()
+					actualStdout := result.Stdout.W.Bytes()
 					expectedStdout, err := os.ReadFile(changeExtension(p, ".stdout"))
 					So(err, ShouldBeNil)
 					So(string(actualStdout), ShouldEqual, string(expectedStdout))

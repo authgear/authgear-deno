@@ -13,11 +13,23 @@ type RunRequest struct {
 	Input  interface{} `json:"input"`
 }
 
+type Stream struct {
+	String    string `json:"string,omitempty"`
+	Truncated bool   `json:"truncated,omitempty"`
+}
+
+func NewStream(stdStream deno.StdStream) *Stream {
+	return &Stream{
+		String:    stdStream.W.String(),
+		Truncated: stdStream.Exceeded,
+	}
+}
+
 type RunResponse struct {
 	Error  string      `json:"error,omitempty"`
 	Output interface{} `json:"output,omitempty"`
-	Stderr string      `json:"stderr,omitempty"`
-	Stdout string      `json:"stdout,omitempty"`
+	Stderr *Stream     `json:"stderr,omitempty"`
+	Stdout *Stream     `json:"stdout,omitempty"`
 }
 
 type T struct {
@@ -65,8 +77,8 @@ func (t *T) writeError(w http.ResponseWriter, r *http.Request, err error) {
 
 	var runFileError *deno.RunFileError
 	if errors.As(err, &runFileError) {
-		runResponse.Stderr = runFileError.Stderr.String()
-		runResponse.Stdout = runFileError.Stdout.String()
+		runResponse.Stderr = NewStream(runFileError.Stderr)
+		runResponse.Stdout = NewStream(runFileError.Stdout)
 	}
 
 	t.writeJSON(w, r, runResponse)
@@ -76,8 +88,8 @@ func (t *T) writeError(w http.ResponseWriter, r *http.Request, err error) {
 func (t *T) writeResult(w http.ResponseWriter, r *http.Request, result *deno.RunGoValueResult) {
 	runResponse := RunResponse{
 		Output: result.Output,
-		Stderr: result.Stderr.String(),
-		Stdout: result.Stdout.String(),
+		Stderr: NewStream(result.Stderr),
+		Stdout: NewStream(result.Stdout),
 	}
 	t.writeJSON(w, r, runResponse)
 }
