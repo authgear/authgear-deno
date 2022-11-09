@@ -31,3 +31,19 @@ jobs:
       if: ${{ !cancelled() }}
     - run: make check-tidy
       if: ${{ !cancelled() }}
+
+  distribute:
+    runs-on: ubuntu-22.04
+    needs: test
+    steps:
+    - uses: actions/checkout@v3
+    - run: make build-image
+    - name: Login to Quay.io
+      if: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
+      uses: docker/login-action@v2
+      with:
+        registry: quay.io
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+    - run: make push-image
+      if: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
