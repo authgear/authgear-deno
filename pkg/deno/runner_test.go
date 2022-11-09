@@ -44,7 +44,7 @@ func shouldEqualContent(actual interface{}, expected ...interface{}) string {
 		return err.Error()
 	}
 
-	return ShouldResemble(content1, content2)
+	return ShouldResemble(string(content1), string(content2))
 }
 
 func TestRunner(t *testing.T) {
