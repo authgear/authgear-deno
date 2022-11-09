@@ -5,9 +5,9 @@ import (
 	"io"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
-
 	"github.com/authgear/authgear-deno/pkg/ioutil"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestLimitedWriter(t *testing.T) {
