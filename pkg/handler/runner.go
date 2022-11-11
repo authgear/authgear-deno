@@ -32,17 +32,11 @@ type RunResponse struct {
 	Stdout *Stream     `json:"stdout,omitempty"`
 }
 
-type T struct {
+type Runner struct {
 	Runner *deno.Runner
 }
 
-func New(runner *deno.Runner) *T {
-	return &T{
-		Runner: runner,
-	}
-}
-
-func (t *T) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *Runner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	result, err := t.handle(w, r)
 	if err != nil {
@@ -52,7 +46,7 @@ func (t *T) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.writeResult(w, r, result)
 }
 
-func (t *T) handle(_ http.ResponseWriter, r *http.Request) (*deno.RunGoValueResult, error) {
+func (t *Runner) handle(_ http.ResponseWriter, r *http.Request) (*deno.RunGoValueResult, error) {
 	var runRequest RunRequest
 	err := json.NewDecoder(r.Body).Decode(&runRequest)
 	if err != nil {
@@ -70,7 +64,7 @@ func (t *T) handle(_ http.ResponseWriter, r *http.Request) (*deno.RunGoValueResu
 	return result, nil
 }
 
-func (t *T) writeError(w http.ResponseWriter, r *http.Request, err error) {
+func (t *Runner) writeError(w http.ResponseWriter, r *http.Request, err error) {
 	runResponse := RunResponse{
 		Error: err.Error(),
 	}
@@ -81,20 +75,19 @@ func (t *T) writeError(w http.ResponseWriter, r *http.Request, err error) {
 		runResponse.Stdout = NewStream(runFileError.Stdout)
 	}
 
-	t.writeJSON(w, r, runResponse)
-
+	writeJSON(w, r, runResponse)
 }
 
-func (t *T) writeResult(w http.ResponseWriter, r *http.Request, result *deno.RunGoValueResult) {
+func (t *Runner) writeResult(w http.ResponseWriter, r *http.Request, result *deno.RunGoValueResult) {
 	runResponse := RunResponse{
 		Output: result.Output,
 		Stderr: NewStream(result.Stderr),
 		Stdout: NewStream(result.Stdout),
 	}
-	t.writeJSON(w, r, runResponse)
+	writeJSON(w, r, runResponse)
 }
 
-func (t *T) writeJSON(w http.ResponseWriter, _ *http.Request, jsonValue interface{}) {
+func writeJSON(w http.ResponseWriter, _ *http.Request, jsonValue interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	//nolint:errchkjson
 	_ = json.NewEncoder(w).Encode(jsonValue)

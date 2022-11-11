@@ -14,13 +14,12 @@ func main() {
 		panic(err)
 	}
 
-	permissioner := deno.DisallowIPPolicy(cfg.IPPolicies()...)
-	runner := &deno.Runner{
-		RunnerScript: cfg.RunnerScript,
-		Permissioner: permissioner,
-	}
-	h := handler.New(runner)
-	http.Handle("/", h)
+	http.Handle("/run", &handler.Runner{
+		Runner: &deno.Runner{
+			RunnerScript: cfg.RunnerScript,
+			Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
+		},
+	})
 
 	server := &http.Server{
 		Addr:              cfg.ListenAddr,
