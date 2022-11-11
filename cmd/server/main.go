@@ -20,6 +20,9 @@ func main() {
 			Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
 		},
 	})
+	http.Handle("/check", &handler.Checker{
+		Checker: &deno.Checker{},
+	})
 
 	server := &http.Server{
 		Addr:              cfg.ListenAddr,
