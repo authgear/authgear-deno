@@ -1,0 +1,4 @@
+error: TS2588 [ERROR]: Cannot assign to 'a' because it is a constant.
+a = 2;
+^
+    at FILE:2:1

@@ -1,2 +1,2 @@
-pkg/deno/testdata/good/*.out
-pkg/deno/testdata/bad/*.out
+pkg/deno/testdata/**/*.out
+pkg/deno/testdata/**/*.out
