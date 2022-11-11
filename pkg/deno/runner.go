@@ -140,7 +140,7 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 			// Start of permission prompt
 			if strings.HasPrefix(line, "⚠️  ┌ Deno requests ") {
 				var granted bool
-				d, ok := lineToPermissionDescriptor(line)
+				d, ok := LineToPermissionDescriptor(line)
 				if ok {
 					granted = r.askPermission(ctx, *d)
 				}

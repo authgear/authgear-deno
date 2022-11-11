@@ -1,4 +1,4 @@
-package deno
+package deno_test
 
 import (
 	"io"

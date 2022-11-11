@@ -1,9 +1,11 @@
-package deno
+package deno_test
 
 import (
 	"context"
 	"encoding/json"
 	"testing"
+
+	"github.com/authgear/authgear-deno/pkg/deno"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -34,20 +36,20 @@ func TestAllowRemoteIP(t *testing.T) {
 		}
 		ctx := context.Background()
 
-		p := DisallowIPPolicy(
-			DisallowGlobalUnicast,
-			DisallowInterfaceLocalMulticast,
-			DisallowLinkLocalUnicast,
-			DisallowLinkLocalMulticast,
-			DisallowLoopback,
-			DisallowMulticast,
-			DisallowPrivate,
-			DisallowUnspecified,
+		p := deno.DisallowIPPolicy(
+			deno.DisallowGlobalUnicast,
+			deno.DisallowInterfaceLocalMulticast,
+			deno.DisallowLinkLocalUnicast,
+			deno.DisallowLinkLocalMulticast,
+			deno.DisallowLoopback,
+			deno.DisallowMulticast,
+			deno.DisallowPrivate,
+			deno.DisallowUnspecified,
 		)
 
 		for _, c := range cases {
 			Convey(c.descriptor, func() {
-				var pd PermissionDescriptor
+				var pd deno.PermissionDescriptor
 				err := json.Unmarshal([]byte(c.descriptor), &pd)
 				So(err, ShouldBeNil)
 				actual, err := p.RequestPermission(ctx, pd)

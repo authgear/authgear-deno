@@ -1,4 +1,4 @@
-package deno
+package deno_test
 
 import (
 	"context"
@@ -9,23 +9,25 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/authgear/authgear-deno/pkg/deno"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestRunner(t *testing.T) {
 	Convey("Runner", t, func() {
 		ctx := context.Background()
-		runner := &Runner{
+		runner := &deno.Runner{
 			RunnerScript: "./runner.ts",
-			Permissioner: DisallowIPPolicy(
-				DisallowGlobalUnicast,
-				DisallowInterfaceLocalMulticast,
-				DisallowLinkLocalUnicast,
-				DisallowLinkLocalMulticast,
-				DisallowLoopback,
-				DisallowMulticast,
-				DisallowPrivate,
-				DisallowUnspecified,
+			Permissioner: deno.DisallowIPPolicy(
+				deno.DisallowGlobalUnicast,
+				deno.DisallowInterfaceLocalMulticast,
+				deno.DisallowLinkLocalUnicast,
+				deno.DisallowLinkLocalMulticast,
+				deno.DisallowLoopback,
+				deno.DisallowMulticast,
+				deno.DisallowPrivate,
+				deno.DisallowUnspecified,
 			),
 		}
 
@@ -34,7 +36,7 @@ func TestRunner(t *testing.T) {
 			So(err, ShouldBeNil)
 			for _, p := range targetScripts {
 				Convey(p, func() {
-					opts := RunFileOptions{
+					opts := deno.RunFileOptions{
 						TargetScript: p,
 						Input:        changeExtension(p, ".in"),
 						Output:       changeExtension(p, ".out"),
@@ -56,13 +58,13 @@ func TestRunner(t *testing.T) {
 			So(err, ShouldBeNil)
 			for _, p := range targetScripts {
 				Convey(p, func() {
-					opts := RunFileOptions{
+					opts := deno.RunFileOptions{
 						TargetScript: p,
 						Input:        changeExtension(p, ".in"),
 						Output:       changeExtension(p, ".out"),
 					}
 					_, err := runner.RunFile(ctx, opts)
-					var runError *RunFileError
+					var runError *deno.RunFileError
 					var exitError *exec.ExitError
 					// TODO: I wanted to match the stderr as well. But 2 problems block me.
 					// 1. The stderr contains some ASCII escape sequence that Deno uses to clear the screen.
@@ -90,7 +92,7 @@ func TestRunner(t *testing.T) {
 					err = json.Unmarshal(inputBytes, &input)
 					So(err, ShouldBeNil)
 
-					opts := RunGoValueOptions{
+					opts := deno.RunGoValueOptions{
 						TargetScript: targetScript,
 						Input:        input,
 					}

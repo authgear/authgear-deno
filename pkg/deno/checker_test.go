@@ -1,4 +1,4 @@
-package deno
+package deno_test
 
 import (
 	"context"
@@ -7,13 +7,15 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/authgear/authgear-deno/pkg/deno"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestChecker(t *testing.T) {
 	Convey("Checker", t, func() {
 		ctx := context.Background()
-		checker := &Checker{}
+		checker := &deno.Checker{}
 
 		Convey("CheckFile", func() {
 			targetScripts, err := filepath.Glob("./testdata/checker/*.ts")
@@ -23,7 +25,7 @@ func TestChecker(t *testing.T) {
 					expectedStderr, err := os.ReadFile(changeExtension(p, ".stderr"))
 					So(err, ShouldBeNil)
 
-					opts := CheckFileOptions{
+					opts := deno.CheckFileOptions{
 						TargetScript: p,
 					}
 					err = checker.CheckFile(ctx, opts)
@@ -31,7 +33,7 @@ func TestChecker(t *testing.T) {
 					if len(expectedStderr) <= 0 {
 						So(err, ShouldBeNil)
 					} else {
-						var checkError *CheckFileError
+						var checkError *deno.CheckFileError
 						So(errors.As(err, &checkError), ShouldBeTrue)
 						So(checkError.Stderr, ShouldEqual, string(expectedStderr))
 					}

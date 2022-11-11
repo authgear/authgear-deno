@@ -8,7 +8,7 @@ var accessToRegexp = regexp.MustCompile(`⚠️  ┌ Deno requests (.+) access t
 var allAccessRegexp = regexp.MustCompile(`⚠️  ┌ Deno requests (.+) access\.`)
 var hrtimeRegexp = regexp.MustCompile(`⚠️  ┌ Deno requests access to high precision time\.`)
 
-func lineToPermissionDescriptor(line string) (*PermissionDescriptor, bool) {
+func LineToPermissionDescriptor(line string) (*PermissionDescriptor, bool) {
 	if matches := hrtimeRegexp.FindStringSubmatch(line); len(matches) == 1 {
 		return &PermissionDescriptor{
 			Name: PermissionNameHrtime,

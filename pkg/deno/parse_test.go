@@ -1,8 +1,10 @@
-package deno
+package deno_test
 
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/authgear/authgear-deno/pkg/deno"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -40,7 +42,7 @@ func TestLineToPermissionDescriptor(t *testing.T) {
 
 		for _, c := range cases {
 			Convey(c.line, func() {
-				d, ok := lineToPermissionDescriptor(c.line)
+				d, ok := deno.LineToPermissionDescriptor(c.line)
 				So(ok, ShouldBeTrue)
 				b, _ := json.Marshal(d)
 				So(string(b), ShouldEqualJSON, c.expected)
