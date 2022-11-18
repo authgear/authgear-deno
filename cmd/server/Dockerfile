@@ -5,7 +5,7 @@ RUN go mod download
 COPY . .
 RUN make build
 
-FROM denoland/deno:bin-1.27.0 as stage2
+FROM denoland/deno:bin-1.28.1 as stage2
 
 FROM debian:bullseye-20220125-slim
 ENV RUNNER_SCRIPT=/app/runner.ts
