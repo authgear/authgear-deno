@@ -106,6 +106,7 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 		ctx,
 		"deno",
 		"run",
+		"--unstable",
 		"--quiet",
 		fmt.Sprintf("--allow-read=%v,%v", targetScript, input),
 		fmt.Sprintf("--allow-write=%v", output),

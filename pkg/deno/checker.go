@@ -47,6 +47,7 @@ func (c *Checker) CheckFile(ctx context.Context, opts CheckFileOptions) error {
 		ctx,
 		"deno",
 		"check",
+		"--unstable",
 		"--quiet",
 		targetScript,
 	)
