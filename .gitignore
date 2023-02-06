@@ -1,2 +1,4 @@
 pkg/deno/testdata/**/*.out
 pkg/deno/testdata/**/*.out
+
+deno.lock
