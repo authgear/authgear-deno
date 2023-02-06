@@ -9,8 +9,9 @@ import (
 )
 
 type RunRequest struct {
-	Script string      `json:"script"`
-	Input  interface{} `json:"input"`
+	Script               string      `json:"script"`
+	Input                interface{} `json:"input"`
+	IsUnstableAPIAllowed bool        `json:"is_unstable_api_allowed"`
 }
 
 type Stream struct {
@@ -54,8 +55,9 @@ func (t *Runner) handle(_ http.ResponseWriter, r *http.Request) (*deno.RunGoValu
 	}
 
 	result, err := t.Runner.RunGoValue(r.Context(), deno.RunGoValueOptions{
-		TargetScript: runRequest.Script,
-		Input:        runRequest.Input,
+		TargetScript:         runRequest.Script,
+		Input:                runRequest.Input,
+		IsUnstableAPIAllowed: runRequest.IsUnstableAPIAllowed,
 	})
 	if err != nil {
 		return nil, err

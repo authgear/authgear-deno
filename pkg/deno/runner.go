@@ -56,6 +56,8 @@ type RunFileOptions struct {
 	Input string
 	// Output is the filename of the output.
 	Output string
+	// Allow using unstable api in deno script if true
+	IsUnstableAPIAllowed bool
 }
 
 type RunGoValueResult struct {
@@ -69,6 +71,8 @@ type RunGoValueOptions struct {
 	TargetScript string
 	// Input is the input.
 	Input interface{}
+	// Allow using unstable api in deno script if true
+	IsUnstableAPIAllowed bool
 }
 
 type Runner struct {
@@ -102,17 +106,27 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 		return nil, err
 	}
 
-	cmd := exec.CommandContext( //nolint:gosec
-		ctx,
-		"deno",
+	var cmdArgs []string = []string{
 		"run",
 		"--quiet",
 		fmt.Sprintf("--allow-read=%v,%v", targetScript, input),
 		fmt.Sprintf("--allow-write=%v", output),
+	}
+
+	if opts.IsUnstableAPIAllowed {
+		cmdArgs = append(cmdArgs, "--unstable")
+	}
+
+	cmdArgs = append(cmdArgs,
 		runnerScript,
 		targetScript,
 		input,
-		output,
+		output)
+
+	cmd := exec.CommandContext( //nolint:gosec
+		ctx,
+		"deno",
+		cmdArgs...,
 	)
 
 	// Tell deno not to output ASCII escape code.
@@ -207,9 +221,10 @@ func (r *Runner) RunGoValue(ctx context.Context, opts RunGoValueOptions) (*RunGo
 	}
 
 	runFileResult, err := r.RunFile(ctx, RunFileOptions{
-		TargetScript: targetScript.Name(),
-		Input:        input.Name(),
-		Output:       output.Name(),
+		TargetScript:         targetScript.Name(),
+		Input:                input.Name(),
+		Output:               output.Name(),
+		IsUnstableAPIAllowed: opts.IsUnstableAPIAllowed,
 	})
 	if err != nil {
 		return nil, err

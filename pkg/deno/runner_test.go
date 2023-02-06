@@ -37,9 +37,10 @@ func TestRunner(t *testing.T) {
 			for _, p := range targetScripts {
 				Convey(p, func() {
 					opts := deno.RunFileOptions{
-						TargetScript: p,
-						Input:        changeExtension(p, ".in"),
-						Output:       changeExtension(p, ".out"),
+						TargetScript:         p,
+						Input:                changeExtension(p, ".in"),
+						Output:               changeExtension(p, ".out"),
+						IsUnstableAPIAllowed: false,
 					}
 					result, err := runner.RunFile(ctx, opts)
 					So(err, ShouldBeNil)
@@ -59,9 +60,10 @@ func TestRunner(t *testing.T) {
 			for _, p := range targetScripts {
 				Convey(p, func() {
 					opts := deno.RunFileOptions{
-						TargetScript: p,
-						Input:        changeExtension(p, ".in"),
-						Output:       changeExtension(p, ".out"),
+						TargetScript:         p,
+						Input:                changeExtension(p, ".in"),
+						Output:               changeExtension(p, ".out"),
+						IsUnstableAPIAllowed: false,
 					}
 					_, err := runner.RunFile(ctx, opts)
 					var runError *deno.RunFileError
@@ -93,8 +95,9 @@ func TestRunner(t *testing.T) {
 					So(err, ShouldBeNil)
 
 					opts := deno.RunGoValueOptions{
-						TargetScript: targetScript,
-						Input:        input,
+						TargetScript:         targetScript,
+						Input:                input,
+						IsUnstableAPIAllowed: false,
 					}
 
 					runGoValueResult, err := runner.RunGoValue(ctx, opts)
