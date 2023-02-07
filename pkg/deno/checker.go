@@ -15,11 +15,15 @@ import (
 type CheckFileOptions struct {
 	// TargetScript is the filename of the target script.
 	TargetScript string
+	// Allow using unstable api in deno script if true
+	IsUnstableAPIAllowed bool
 }
 
 type CheckSnippetOptions struct {
 	// TargetScript is the content of the target script.
 	TargetScript string
+	// Allow using unstable api in deno script if true
+	IsUnstableAPIAllowed bool
 }
 
 type CheckFileError struct {
@@ -43,12 +47,19 @@ func (c *Checker) CheckFile(ctx context.Context, opts CheckFileOptions) error {
 		return err
 	}
 
+	var cmdArgs []string = []string{"check", "--quiet"}
+
+	if opts.IsUnstableAPIAllowed {
+		cmdArgs = append(cmdArgs, "--unstable")
+	}
+
+	cmdArgs = append(cmdArgs,
+		targetScript)
+
 	cmd := exec.CommandContext(
 		ctx,
 		"deno",
-		"check",
-		"--quiet",
-		targetScript,
+		cmdArgs...,
 	)
 
 	// Tell deno not to output ASCII escape code.
@@ -85,7 +96,8 @@ func (c *Checker) CheckSnippet(ctx context.Context, opts CheckSnippetOptions) er
 	}
 
 	err = c.CheckFile(ctx, CheckFileOptions{
-		TargetScript: targetScript.Name(),
+		TargetScript:         targetScript.Name(),
+		IsUnstableAPIAllowed: opts.IsUnstableAPIAllowed,
 	})
 	if err != nil {
 		return err

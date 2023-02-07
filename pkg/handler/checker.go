@@ -9,7 +9,8 @@ import (
 )
 
 type CheckRequest struct {
-	Script string `json:"script"`
+	Script               string `json:"script"`
+	IsUnstableAPIAllowed bool   `json:"is_unstable_api_allowed"`
 }
 
 type CheckResponse struct {
@@ -38,7 +39,8 @@ func (t *Checker) handle(_ http.ResponseWriter, r *http.Request) error {
 	}
 
 	err = t.Checker.CheckSnippet(r.Context(), deno.CheckSnippetOptions{
-		TargetScript: checkRequest.Script,
+		TargetScript:         checkRequest.Script,
+		IsUnstableAPIAllowed: checkRequest.IsUnstableAPIAllowed,
 	})
 	if err != nil {
 		return err

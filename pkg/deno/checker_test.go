@@ -26,7 +26,8 @@ func TestChecker(t *testing.T) {
 					So(err, ShouldBeNil)
 
 					opts := deno.CheckFileOptions{
-						TargetScript: p,
+						TargetScript:         p,
+						IsUnstableAPIAllowed: false,
 					}
 					err = checker.CheckFile(ctx, opts)
 
@@ -53,7 +54,8 @@ func TestChecker(t *testing.T) {
 					So(err, ShouldBeNil)
 
 					opts := deno.CheckSnippetOptions{
-						TargetScript: string(targetScriptBytes),
+						TargetScript:         string(targetScriptBytes),
+						IsUnstableAPIAllowed: false,
 					}
 					err = checker.CheckSnippet(ctx, opts)
 
