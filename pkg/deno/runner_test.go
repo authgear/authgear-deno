@@ -14,6 +14,30 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+type RunnerTestConfig struct {
+	IsUnstableAPIAllowed bool `json:"is_unstable_api_allowed"`
+}
+
+var defaultRunnerConfig = RunnerTestConfig{
+	IsUnstableAPIAllowed: false,
+}
+
+func readRunnerTestConfig(path string) (*RunnerTestConfig, error) {
+	configBytes, err := os.ReadFile(changeExtension(path, ".config.json"))
+	var testConfig RunnerTestConfig
+	if errors.Is(err, os.ErrNotExist) {
+		return &defaultRunnerConfig, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(configBytes, &testConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &testConfig, nil
+}
+
 func TestRunner(t *testing.T) {
 	Convey("Runner", t, func() {
 		ctx := context.Background()
@@ -36,11 +60,14 @@ func TestRunner(t *testing.T) {
 			So(err, ShouldBeNil)
 			for _, p := range targetScripts {
 				Convey(p, func() {
+					testConfig, err := readRunnerTestConfig(p)
+					So(err, ShouldBeNil)
+
 					opts := deno.RunFileOptions{
 						TargetScript:         p,
 						Input:                changeExtension(p, ".in"),
 						Output:               changeExtension(p, ".out"),
-						IsUnstableAPIAllowed: false,
+						IsUnstableAPIAllowed: testConfig.IsUnstableAPIAllowed,
 					}
 					result, err := runner.RunFile(ctx, opts)
 					So(err, ShouldBeNil)
@@ -59,13 +86,15 @@ func TestRunner(t *testing.T) {
 			So(err, ShouldBeNil)
 			for _, p := range targetScripts {
 				Convey(p, func() {
+					testConfig, err := readRunnerTestConfig(p)
+					So(err, ShouldBeNil)
 					opts := deno.RunFileOptions{
 						TargetScript:         p,
 						Input:                changeExtension(p, ".in"),
 						Output:               changeExtension(p, ".out"),
-						IsUnstableAPIAllowed: false,
+						IsUnstableAPIAllowed: testConfig.IsUnstableAPIAllowed,
 					}
-					_, err := runner.RunFile(ctx, opts)
+					_, err = runner.RunFile(ctx, opts)
 					var runError *deno.RunFileError
 					var exitError *exec.ExitError
 					// TODO: I wanted to match the stderr as well. But 2 problems block me.
@@ -94,10 +123,13 @@ func TestRunner(t *testing.T) {
 					err = json.Unmarshal(inputBytes, &input)
 					So(err, ShouldBeNil)
 
+					testConfig, err := readRunnerTestConfig(p)
+					So(err, ShouldBeNil)
+
 					opts := deno.RunGoValueOptions{
 						TargetScript:         targetScript,
 						Input:                input,
-						IsUnstableAPIAllowed: false,
+						IsUnstableAPIAllowed: testConfig.IsUnstableAPIAllowed,
 					}
 
 					runGoValueResult, err := runner.RunGoValue(ctx, opts)
