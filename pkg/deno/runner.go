@@ -106,7 +106,7 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 		return nil, err
 	}
 
-	var cmdArgs []string = []string{
+	cmdArgs := []string{
 		"run",
 		"--quiet",
 		fmt.Sprintf("--allow-read=%v,%v", targetScript, input),

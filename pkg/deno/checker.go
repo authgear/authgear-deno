@@ -47,7 +47,7 @@ func (c *Checker) CheckFile(ctx context.Context, opts CheckFileOptions) error {
 		return err
 	}
 
-	var cmdArgs []string = []string{"check", "--quiet"}
+	cmdArgs := []string{"check", "--quiet"}
 
 	if opts.IsUnstableAPIAllowed {
 		cmdArgs = append(cmdArgs, "--unstable")
