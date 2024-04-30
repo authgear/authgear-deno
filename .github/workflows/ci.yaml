@@ -16,13 +16,13 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
-        go-version: "1.19.2"
+        go-version-file: "./go.mod"
     - uses: denoland/setup-deno@v1
       with:
-        deno-version: "1.28.1"
+        deno-version: "1.41.3"
     - run: make vendor
       if: ${{ !cancelled() }}
     - run: make lint
@@ -36,11 +36,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: test
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: make build-image
     - name: Login to Quay.io
       if: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: quay.io
         username: ${{ secrets.QUAY_USERNAME }}

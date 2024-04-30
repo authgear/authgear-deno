@@ -1,15 +1,17 @@
 module github.com/authgear/authgear-deno
 
-go 1.19
+// go1.21 supports toolchain
+// See https://go.dev/doc/toolchain
+go 1.21.9
 
 require (
-	github.com/creack/pty v1.1.18
+	github.com/creack/pty v1.1.21
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/smartystreets/goconvey v1.7.2
+	github.com/smartystreets/goconvey v1.8.1
 )
 
 require (
-	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
+	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
-	github.com/smartystreets/assertions v1.2.0 // indirect
+	github.com/smarty/assertions v1.15.0 // indirect
 )

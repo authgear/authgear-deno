@@ -138,13 +138,12 @@ func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResu
 		for scanner.Scan() {
 			line := scanner.Text()
 			// Start of permission prompt
-			if strings.HasPrefix(line, "⚠️  ┌ Deno requests ") {
+			if strings.Contains(line, "Deno requests ") {
 				var granted bool
 				d, ok := LineToPermissionDescriptor(line)
 				if ok {
 					granted = r.askPermission(ctx, *d)
 				}
-				r.skipToPrompt(scanner)
 				if granted {
 					fmt.Fprintf(f, "y\n")
 				} else {
@@ -241,13 +240,4 @@ func (r *Runner) askPermission(ctx context.Context, d PermissionDescriptor) bool
 		return false
 	}
 	return ok
-}
-
-func (r *Runner) skipToPrompt(scanner *bufio.Scanner) {
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, "(y = yes, allow; n = no, deny) > ") {
-			break
-		}
-	}
 }

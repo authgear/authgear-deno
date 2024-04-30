@@ -7,6 +7,10 @@ linters:
   - maligned
   - structcheck
   - varcheck
+  - revive
+  - tagalign
+  - depguard
+  - musttag
   presets:
   - bugs
   - error
