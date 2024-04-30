@@ -1,4 +1,4 @@
-FROM golang:1.19.2-bullseye as stage1
+FROM golang:1.21.9-bullseye as stage1
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
