@@ -22,7 +22,7 @@ jobs:
         go-version-file: "./go.mod"
     - uses: denoland/setup-deno@v1
       with:
-        deno-version: "1.30.3"
+        deno-version: "1.31.3"
     - run: make vendor
       if: ${{ !cancelled() }}
     - run: make lint
