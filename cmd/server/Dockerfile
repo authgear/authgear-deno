@@ -1,4 +1,4 @@
-FROM golang:1.21.9-bullseye as stage1
+FROM golang:1.21.9-bookworm as stage1
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -7,7 +7,7 @@ RUN make build
 
 FROM denoland/deno:bin-1.41.3 as stage2
 
-FROM debian:bullseye-20220125-slim
+FROM debian:bookworm-slim
 ENV RUNNER_SCRIPT=/app/runner.ts
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
