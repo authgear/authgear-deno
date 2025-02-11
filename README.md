@@ -23,37 +23,37 @@ $ make start
 
 ```
 $ curl --request POST \
-  --url http://localhost:8090/ \
+  --url http://localhost:8090/run \
   --header 'Content-Type: application/json' \
   --data '{
 	"script": "export default async function addOne(a) { return a + 1; }",
 	"input": 42
 }'
-{"output":43}
+{"output":43,"stderr":{},"stdout":{}}
 ```
 
 ### Evaluate a function with side-effects
 
 ```
 $ curl --request POST \
-  --url http://localhost:8090/ \
+  --url http://localhost:8090/run \
   --header 'Content-Type: application/json' \
   --data '{
 	"script": "export default async function addOne(a) { console.log('\''hello'\''); return a + 1; }",
 	"input": 42
 }'
-{"output":43,"stdout":"hello\n"}
+{"output":43,"stderr":{},"stdout":{"string":"hello\n"}}
 ```
 
 ### Evaluate a malicious function
 
 ```
 $ curl --request POST \
-  --url http://localhost:8090/ \
+  --url http://localhost:8090/run \
   --header 'Content-Type: application/json' \
   --data '{
 	"script": "export default async function malicious() { Deno.remove('\''/'\'', { recursive: true}) }",
 	"input": 42
 }'
-{"error":"exit status 1","stderr":"⚠️  ┌ Deno requests write access to \"/\".\r\n   ├ Requested by `Deno.remove()` API\r\n   ├ Run again with --allow-write to bypass this prompt.\r\n   └ Allow? [y/n] (y = yes, allow; n = no, deny) \u003e n\r\n\u001b[4A\u001b[0J❌ Denied write access to \"/\".\r\nerror: Uncaught (in promise) PermissionDenied: Requires write access to \"/\", run again with the --allow-write flag\r\n    at async Object.remove (deno:runtime/js/30_fs.js:167:5)\r\n"}
+{"error":"exit status 1","stderr":{"string":"┌ ⚠️  Deno requests write access to \"/\".\r\n├ Requested by `Deno.remove()` API.\r\n├ Run again with --allow-write to bypass this prompt.\r\n└ Allow? [y/n/A] (y = yes, allow; n = no, deny; A = allow all write permissions) \u003e n\r\n\u001b[4A\u001b[0J❌ Denied write access to \"/\".\r\nerror: Uncaught (in promise) PermissionDenied: Requires write access to \"/\", run again with the --allow-write flag\r\nexport default async function malicious() { Deno.remove('/', { recursive: true}) }\r\n                                                 ^\r\n    at Object.remove (ext:deno_fs/30_fs.js:259:9)\r\n    at Module.malicious (file:///var/folders/8x/b6m06y8j6xdfhnb574s1yn_00000gn/T/authgear-deno-script.3385027413.ts:1:50)\r\n    at file:///Users/louischan/authgear-deno/pkg/deno/runner.ts:7:47\r\n"},"stdout":{}}
 ```
