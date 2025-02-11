@@ -34,22 +34,6 @@
         "type": "github"
       }
     },
-    "go_1_21_9": {
-      "locked": {
-        "lastModified": 1714750952,
-        "narHash": "sha256-oOUdvPrO8CbupgDSaPou+Jv6GL+uQA2QlE33D7OLzkM=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "5fd8536a9a5932d4ae8de52b7dc08d92041237fc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "5fd8536a9a5932d4ae8de52b7dc08d92041237fc",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1736943799,
@@ -70,7 +54,6 @@
       "inputs": {
         "deno_1_41_3": "deno_1_41_3",
         "flake-utils": "flake-utils",
-        "go_1_21_9": "go_1_21_9",
         "nixpkgs": "nixpkgs"
       }
     },

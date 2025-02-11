@@ -4,7 +4,6 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
-    go_1_21_9.url = "github:NixOS/nixpkgs/5fd8536a9a5932d4ae8de52b7dc08d92041237fc";
     deno_1_41_3.url = "github:NixOS/nixpkgs/080a4a27f206d07724b88da096e27ef63401a504";
   };
 
@@ -12,21 +11,35 @@
     {
       nixpkgs,
       flake-utils,
-      go_1_21_9,
       deno_1_41_3,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        go_1_21 = go_1_21_9.legacyPackages.${system}.go_1_21;
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            # As of 2025-02-07, 1.23.6 is still unavailable in nixpkgs-unstable, so we need to use overlay to build 1.23.6 ourselves.
+            (final: prev: {
+              go = (
+                prev.go.overrideAttrs {
+                  version = "1.23.6";
+                  src = prev.fetchurl {
+                    url = "https://go.dev/dl/go1.23.6.src.tar.gz";
+                    hash = "sha256-A5xbBOZSedrO7opvcecL0Fz1uAF4K293xuGeLtBREiI=";
+                  };
+                }
+              );
+            })
+          ];
+        };
         deno = deno_1_41_3.legacyPackages.${system}.deno;
       in
       {
         devShells.default = pkgs.mkShellNoCC {
           packages = [
-            go_1_21
+            pkgs.go
             deno
           ];
         };
