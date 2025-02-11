@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,6 +17,9 @@ import (
 
 	"github.com/authgear/authgear-deno/pkg/ioutil"
 )
+
+//go:embed runner.ts
+var runnerScriptBytes []byte
 
 type StdStream = *ioutil.LimitedWriter[*bytes.Buffer]
 
@@ -72,22 +76,28 @@ type RunGoValueOptions struct {
 }
 
 type Runner struct {
-	// RunnerScript is the runner script that will import the target script
-	// and execute the default function.
-	RunnerScript string
 	// Permissioner manages the permissions of the target script.
 	Permissioner Permissioner
 }
 
-func (r *Runner) runnerScript() string {
-	if r.RunnerScript != "" {
-		return r.RunnerScript
-	}
-	return "./runner.ts"
-}
-
 func (r *Runner) RunFile(ctx context.Context, opts RunFileOptions) (*RunFileResult, error) {
-	runnerScript := r.runnerScript()
+	runnerScriptFile, err := os.CreateTemp("", "authgear-deno-runner.*.ts")
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(runnerScriptFile.Name())
+	runnerScript, err := filepath.Abs(runnerScriptFile.Name())
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(runnerScriptFile, bytes.NewReader(runnerScriptBytes))
+	if err != nil {
+		return nil, err
+	}
+	err = runnerScriptFile.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	targetScript, err := filepath.Abs(opts.TargetScript)
 	if err != nil {

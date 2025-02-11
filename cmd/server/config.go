@@ -8,7 +8,6 @@ import (
 
 type Config struct {
 	ListenAddr                      string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8090"`
-	RunnerScript                    string `envconfig:"RUNNER_SCRIPT" default:"./pkg/deno/runner.ts"`
 	DisallowGlobalUnicast           bool   `envconfig:"DISALLOW_GLOBAL_UNICAST" default:"false"`
 	DisallowInterfaceLocalMulticast bool   `envconfig:"DISALLOW_INTERFACE_LOCAL_MULTICAST" default:"true"`
 	DisallowLinkLocalUnicast        bool   `envconfig:"DISALLOW_LINK_LOCAL_UNICAST" default:"true"`

@@ -16,7 +16,6 @@ func main() {
 
 	http.Handle("/run", &handler.Runner{
 		Runner: &deno.Runner{
-			RunnerScript: cfg.RunnerScript,
 			Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
 		},
 	})

@@ -8,7 +8,6 @@ RUN make build
 FROM denoland/deno:bin-1.41.3 AS stage2
 
 FROM ubuntu:noble
-ENV RUNNER_SCRIPT=/app/runner.ts
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagic-dev \
@@ -19,7 +18,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 COPY --from=stage1 /src/authgear-deno /usr/local/bin/
-COPY --from=stage1 /src/pkg/deno/runner.ts /app/
 COPY --from=stage2 /deno /usr/local/bin/
 EXPOSE 8090
 CMD ["authgear-deno"]
