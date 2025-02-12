@@ -1,9 +1,11 @@
 GIT_HASH ?= git-$(shell git rev-parse --short=12 HEAD)
-IMAGE ?= quay.io/theauthgear/authgear-deno:$(GIT_HASH)
+BUILD_CONTEXT ::= .
+DOCKERFILE ::= ./cmd/server/Dockerfile
+IMAGE_TAG ?= quay.io/theauthgear/authgear-deno:$(GIT_HASH)
 
 .PHONY: vendor
 vendor:
-	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.55.2
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.64.2
 	go mod download
 
 .PHONY: start
@@ -34,8 +36,8 @@ check-tidy:
 
 .PHONY: build-image
 build-image:
-	docker build --pull --file ./cmd/server/Dockerfile --tag $(IMAGE) .
+	docker build --pull --file $(DOCKERFILE) --tag $(IMAGE_TAG) $(BUILD_CONTEXT)
 
-.PHONY: push-image
-push-image:
-	docker push $(IMAGE)
+.PHONY: gh-actions-env
+gh-actions-env:
+	@printf "BUILD_CONTEXT=%s\nDOCKERFILE=%s\nIMAGE_TAG=%s\n" $(BUILD_CONTEXT) $(DOCKERFILE) $(IMAGE_TAG)

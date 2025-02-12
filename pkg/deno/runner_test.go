@@ -18,7 +18,6 @@ func TestRunner(t *testing.T) {
 	Convey("Runner", t, func() {
 		ctx := context.Background()
 		runner := &deno.Runner{
-			RunnerScript: "./runner.ts",
 			Permissioner: deno.DisallowIPPolicy(
 				deno.DisallowGlobalUnicast,
 				deno.DisallowInterfaceLocalMulticast,

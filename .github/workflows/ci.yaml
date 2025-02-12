@@ -14,12 +14,15 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v5
       with:
         go-version-file: "./go.mod"
+    # setup-deno@v1 uses deno v1 by default.
+    # setup-deno@v2 uses deno v2 by default.
+    # So even there is a possible upgrade, we do not upgrade.
     - uses: denoland/setup-deno@v1
       with:
         deno-version: "1.41.3"
@@ -33,11 +36,18 @@ jobs:
       if: ${{ !cancelled() }}
 
   distribute:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: test
     steps:
     - uses: actions/checkout@v4
-    - run: make build-image
+    - name: Set up inputs to build-push-action
+      id: build-push-action-input
+      run: |
+        make gh-actions-env | tee -a "$GITHUB_OUTPUT"
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Login to Quay.io
       if: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
       uses: docker/login-action@v3
@@ -45,5 +55,12 @@ jobs:
         registry: quay.io
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_ROBOT_TOKEN }}
-    - run: make push-image
-      if: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ steps.build-push-action-input.outputs.BUILD_CONTEXT }}
+        file: ${{ steps.build-push-action-input.outputs.DOCKERFILE }}
+        tags: ${{ steps.build-push-action-input.outputs.IMAGE_TAG }}
+        platforms: linux/amd64,linux/arm64
+        pull: true
+        push: ${{ github.repository == 'authgear/authgear-deno' && github.event_name == 'push' }}
