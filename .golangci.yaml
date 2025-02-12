@@ -2,11 +2,6 @@ linters:
   disable:
   - wrapcheck
   - gofumpt
-  - scopelint
-  - deadcode
-  - maligned
-  - structcheck
-  - varcheck
   - revive
   - tagalign
   - depguard
