@@ -14,12 +14,15 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v5
       with:
         go-version-file: "./go.mod"
+    # setup-deno@v1 uses deno v1 by default.
+    # setup-deno@v2 uses deno v2 by default.
+    # So even there is a possible upgrade, we do not upgrade.
     - uses: denoland/setup-deno@v1
       with:
         deno-version: "1.41.3"
@@ -33,7 +36,7 @@ jobs:
       if: ${{ !cancelled() }}
 
   distribute:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: test
     steps:
     - uses: actions/checkout@v4
