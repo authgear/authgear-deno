@@ -2,6 +2,7 @@ package deno
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 )
@@ -23,7 +24,7 @@ func (e *ErrorInvalidIP) Error() string {
 	return fmt.Sprintf("invalid ip: %v", e.Value)
 }
 
-var ErrAllHost = fmt.Errorf("network permission without host is disallowed")
+var ErrAllHost = errors.New("network permission without host is disallowed")
 
 type ErrorNoIP struct {
 	Host string
