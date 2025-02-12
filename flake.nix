@@ -41,6 +41,31 @@
           packages = [
             pkgs.go
             deno
+
+            (pkgs.golangci-lint.overrideAttrs (
+              prev:
+              let
+                version = "1.64.2";
+              in
+              {
+                inherit version;
+                src = pkgs.fetchFromGitHub {
+                  owner = "golangci";
+                  repo = "golangci-lint";
+                  rev = "v${version}";
+                  hash = "sha256-ODnNBwtfILD0Uy2AKDR/e76ZrdyaOGlCktVUcf9ujy8=";
+                };
+                vendorHash = "sha256-/iq7Ju7c2gS7gZn3n+y0kLtPn2Nn8HY/YdqSDYjtEkI=";
+                # We do not actually override anything here,
+                # but if we do not repeat this, ldflags refers to the original version.
+                ldflags = [
+                  "-s"
+                  "-X main.version=${version}"
+                  "-X main.commit=v${version}"
+                  "-X main.date=19700101-00:00:00"
+                ];
+              }
+            ))
           ];
         };
       }
