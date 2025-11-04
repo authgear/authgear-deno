@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     media-types \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
-RUN update-ca-certificates
 COPY --from=stage1 /src/authgear-deno /usr/local/bin/
 COPY --from=stage2 /deno /usr/local/bin/
+COPY ./docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
 EXPOSE 8090
 CMD ["authgear-deno"]
