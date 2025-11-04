@@ -16,8 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     media-types \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
-RUN update-ca-certificates
 COPY --from=stage1 /src/authgear-deno /usr/local/bin/
 COPY --from=stage2 /deno /usr/local/bin/
+COPY ./docker-entrypoint.sh /usr/local/bin/
+# Ask Deno to use the system certificate store instead.
+# The system certificate store supports mounting extra certificates to /usr/local/share/ca-certificates/*.crt
+# https://deno.com/blog/v1.13#use-system-certificate-store-for-tls
+ENV DENO_TLS_CA_STORE=system
+ENTRYPOINT ["docker-entrypoint.sh"]
 EXPOSE 8090
 CMD ["authgear-deno"]
