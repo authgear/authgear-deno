@@ -30,6 +30,21 @@ func TestRunner(t *testing.T) {
 			),
 		}
 
+		Convey("change default export and give helpful error message", func() {
+			opts := deno.RunFileOptions{
+				TargetScript: "./testdata/runner/no-default-export/hook.ts",
+				Input:        "./testdata/runner/no-default-export/hook.in",
+			}
+			_, err := runner.RunFile(ctx, opts)
+
+			var runError *deno.RunFileError
+			var exitError *exec.ExitError
+			So(errors.As(err, &runError), ShouldBeTrue)
+			So(errors.As(err, &exitError), ShouldBeTrue)
+			So(exitError.ExitCode(), ShouldEqual, 1)
+			So(runError.Stderr.W.String(), ShouldEqual, "The hook must export a default function. Check that you have `export default async function(...) { ... }` in your script.\r\n")
+		})
+
 		Convey("RunFile", func() {
 			targetScripts, err := filepath.Glob("./testdata/runner/good/*.ts")
 			So(err, ShouldBeNil)
