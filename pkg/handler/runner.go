@@ -34,10 +34,29 @@ type RunResponse struct {
 
 type Runner struct {
 	Runner *deno.Runner
+	sema   chan struct{}
+}
+
+func NewRunner(runner *deno.Runner, maxConcurrency int) *Runner {
+	return &Runner{
+		Runner: runner,
+		sema:   make(chan struct{}, maxConcurrency),
+	}
 }
 
 func (t *Runner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+
+	// Wait for a slot to be available or for the request context to be done.
+	select {
+	case t.sema <- struct{}{}:
+		// Acquired a slot; ensure release after handling.
+		defer func() { <-t.sema }()
+	case <-r.Context().Done():
+		http.Error(w, "request canceled", http.StatusRequestTimeout)
+		return
+	}
+
 	result, err := t.handle(w, r)
 	if err != nil {
 		t.writeError(w, r, err)
