@@ -16,7 +16,7 @@ func main() {
 
 	runHandler := handler.NewRunner(&deno.Runner{
 		Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
-	}, cfg.RunMaxConcurrency)
+	}, cfg.RunMaxConcurrency, cfg.RunnerTimeoutSeconds)
 	http.Handle("/run", runHandler)
 	http.Handle("/check", &handler.Checker{
 		Checker: &deno.Checker{},
