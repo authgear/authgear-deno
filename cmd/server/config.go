@@ -16,6 +16,8 @@ type Config struct {
 	DisallowMulticast               bool   `envconfig:"DISALLOW_MULTICAST" default:"true"`
 	DisallowPrivate                 bool   `envconfig:"DISALLOW_PRIVATE" default:"true"`
 	DisallowUnspecified             bool   `envconfig:"DISALLOW_UNSPECIFIED" default:"true"`
+	RunMaxConcurrency               int    `envconfig:"RUN_MAX_CONCURRENCY" default:"10"`
+	RunnerTimeoutSeconds            int    `envconfig:"RUNNER_TIMEOUT_SECONDS" default:"60"`
 }
 
 func LoadConfigFromEnv() (*Config, error) {

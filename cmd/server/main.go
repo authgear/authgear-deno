@@ -14,11 +14,10 @@ func main() {
 		panic(err)
 	}
 
-	http.Handle("/run", &handler.Runner{
-		Runner: &deno.Runner{
-			Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
-		},
-	})
+	runHandler := handler.NewRunner(&deno.Runner{
+		Permissioner: deno.DisallowIPPolicy(cfg.IPPolicies()...),
+	}, cfg.RunMaxConcurrency, cfg.RunnerTimeoutSeconds)
+	http.Handle("/run", runHandler)
 	http.Handle("/check", &handler.Checker{
 		Checker: &deno.Checker{},
 	})
