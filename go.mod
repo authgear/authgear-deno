@@ -2,7 +2,7 @@ module github.com/authgear/authgear-deno
 
 // go1.21 supports toolchain
 // See https://go.dev/doc/toolchain
-go 1.23.6
+go 1.25.6
 
 require (
 	github.com/creack/pty v1.1.21

@@ -4,7 +4,7 @@ import (
 	"io"
 )
 
-// LimitedWriter stops writting to the underlying W when
+// LimitedWriter stops writing to the underlying W when
 // N is non-positive.
 // Unlike [io.LimitedReader], it does not return error when the limit exceeds.
 type LimitedWriter[T io.Writer] struct {

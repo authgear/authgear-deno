@@ -43,7 +43,7 @@ func (c *Checker) CheckFile(ctx context.Context, opts CheckFileOptions) error {
 		return err
 	}
 
-	cmd := exec.CommandContext(
+	cmd := exec.CommandContext( // #nosec G204
 		ctx,
 		"deno",
 		"check",
