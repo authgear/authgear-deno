@@ -5,7 +5,7 @@ IMAGE_TAG ?= quay.io/theauthgear/authgear-deno:$(GIT_HASH)
 
 .PHONY: vendor
 vendor:
-	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v2.5.0
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v2.11.3
 	go mod download
 
 .PHONY: start
